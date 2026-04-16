@@ -1,0 +1,37 @@
+CREATE DATABASE escola;
+
+USE escola;
+
+CREATE TABLE campus(
+codigo_campus INT PRIMARY KEY AUTO_INCREMENT,
+cidade VARCHAR(220),
+endereco  VARCHAR(220)
+);
+
+CREATE TABLE cursos(
+codigo_curso INT PRIMARY KEY AUTO_INCREMENT,
+nome_curso VARCHAR(220),
+turno VARCHAR(220),
+duracao INT,
+valor DECIMAL(10,2),
+id_campus INT,
+FOREIGN KEY (id_campus) REFERENCES campus(codigo_campus)
+);
+
+CREATE TABLE aluno(
+codigo_academico INT PRIMARY KEY AUTO_INCREMENT,
+nome VARCHAR(60),
+data_nascimento DATE,
+CPF CHAR(11),
+sexo ENUM("M", "F") 
+);
+
+CREATE TABLE matricula(
+codigo_de_matricula INT PRIMARY KEY AUTO_INCREMENT,
+data_de_matricula DATE,
+registro_academico INT,
+id_curso INT,
+FOREIGN KEY (registro_academico)REFERENCES aluno(codigo_academico),
+FOREIGN KEY (id_curso) REFERENCES cursos(codigo_curso)
+);
+
