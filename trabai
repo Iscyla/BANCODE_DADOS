@@ -1,0 +1,409 @@
+CREATE DATABASE estoque;
+
+USE estoque;
+
+CREATE TABLE usuarios(
+id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+nome VARCHAR(100),
+cargo VARCHAR(50),
+departamento VARCHAR(50),
+ativo BOOLEAN DEFAULT TRUE,
+email VARCHAR(45) UNIQUE,
+senha VARCHAR(45),
+perfil ENUM('ADM', 'GERENTE', 'VENDEDOR', 'ESTOQUISTA', 'VISUALIZADOR')
+);
+
+CREATE TABLE clientes(
+-- DADOS PESSOAIS
+id_cliente INT AUTO_INCREMENT PRIMARY KEY,
+nome_cliente VARCHAR(100),
+CPF_CNPJ VARCHAR(20) UNIQUE,
+tipo ENUM('FÍSICO', 'JURÍDICO'),
+email_cliente VARCHAR(45) UNIQUE,
+telefone VARCHAR(20),
+-- ENDEREÇO
+cidade VARCHAR(100),
+estado CHAR(2),
+cep VARCHAR (10),
+logradouro VARCHAR(100),
+pais VARCHAR(20),
+numero VARCHAR (5),
+bairro VARCHAR(20),
+complemento VARCHAR(50),
+-- ADICIONAIS
+limite_credito DECIMAL(10,2),
+data_cadastro DATETIME
+);
+
+CREATE TABLE pedidos(
+id_pedido INT AUTO_INCREMENT PRIMARY KEY,
+cod_cliente INT,
+cod_usuario INT,
+data_pedido DATE,
+status_pedido  ENUM('PENDENTE','CONCLUIDO','CANCELADO','EM_ANDAMENTO'),
+valor_total DECIMAL(10,2),
+FOREIGN KEY (cod_cliente) REFERENCES clientes(id_cliente),
+FOREIGN KEY (cod_usuario) REFERENCES usuarios(id_usuario)
+);
+
+CREATE TABLE produtos(
+id_produto INT AUTO_INCREMENT PRIMARY KEY,
+nome_produto VARCHAR(100),
+categoria VARCHAR(50),
+sku VARCHAR(50),
+preco_custo DECIMAL (10,2),
+preco_venda DECIMAL (10,2),
+qauantidade_estoque INT,
+estoque_minimo INT DEFAULT 0,
+status_produto BOOLEAN DEFAULT TRUE,
+fornecenador VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE itens_pedido(
+id_item INT AUTO_INCREMENT PRIMARY KEY,
+cod_pedido INT,
+cod_produto INT,
+quantidade INT,
+preco_unitario DECIMAL (10,2),
+desconto_percentual DECIMAL(5,2),
+FOREIGN KEY (cod_pedido) REFERENCES pedidos(id_pedido),
+FOREIGN KEY (cod_produto) REFERENCES produtos(id_produto)
+);
+
+CREATE TABLE pagamentos (
+id_pagamento INT AUTO_INCREMENT PRIMARY KEY,
+id_pedido INT,
+metodo_pagamento ENUM('PIX', 'CREDITO', 'DEBITO', 'DINHEIRO', 'BOLETO', 'TICKET'),
+valor_pago DECIMAL(10,2),
+status_pagamento ENUM('pendente','aprovado','recusado'),
+FOREIGN KEY (id_pedido) REFERENCES pedidos(id_pedido)
+);
+
+
+INSERT INTO usuarios 
+(nome, cargo, departamento, ativo, email, senha, perfil)
+VALUES
+('Carlos Silva', 'Administrador', 'TI', TRUE, 'carlos@empresa.com', '123456', 'ADM'),
+
+('Mariana Souza', 'Gerente Comercial', 'Vendas', TRUE, 'mariana@empresa.com', '123456', 'GERENTE'),
+
+('João Pereira', 'Vendedor Externo', 'Vendas', TRUE, 'joao@empresa.com', '123456', 'VENDEDOR'),
+
+('Fernanda Lima', 'Controladora de Estoque', 'Estoque', TRUE, 'fernanda@empresa.com', '123456', 'ESTOQUISTA'),
+
+('Lucas Rocha', 'Analista', 'Financeiro', TRUE, 'lucas@empresa.com', '123456', 'VISUALIZADOR');
+
+
+INSERT INTO clientes
+(nome_cliente, CPF_CNPJ, tipo, email_cliente, telefone, cidade, estado, cep, logradouro, pais, numero, bairro, complemento, limite_credito, data_cadastro)
+VALUES
+('Ana Martins', '123.456.789-00', 'FÍSICO', 'ana1@gmail.com', '(27)99999-1111', 'Vitória', 'ES', '29000-000', 'Rua A', 'Brasil', '10', 'Centro', 'Apto 101', 5000.00, NOW()),
+('Bruno Almeida', '123.456.789-01', 'FÍSICO', 'bruno1@gmail.com', '(27)98888-1111', 'Serra', 'ES', '29160-000', 'Rua B', 'Brasil', '20', 'Colina', '', 3000.00, NOW()),
+('Carla Souza', '123.456.789-02', 'FÍSICO', 'carla1@gmail.com', '(27)97777-1111', 'Vila Velha', 'ES', '29100-000', 'Rua C', 'Brasil', '30', 'Praia', '', 4500.00, NOW()),
+('Diego Lima', '123.456.789-03', 'FÍSICO', 'diego1@gmail.com', '(27)96666-1111', 'Cariacica', 'ES', '29140-000', 'Rua D', 'Brasil', '40', 'Campo Grande', '', 2000.00, NOW()),
+('Empresa Alpha LTDA', '11.111.111/0001-11', 'JURÍDICO', 'alpha@gmail.com', '(27)3333-1111', 'Vitória', 'ES', '29010-000', 'Av. Central', 'Brasil', '100', 'Centro', 'Sala 1', 20000.00, NOW()),
+
+('Fernanda Alves', '123.456.789-04', 'FÍSICO', 'fernanda1@gmail.com', '(27)95555-1111', 'Guarapari', 'ES', '29200-000', 'Rua E', 'Brasil', '50', 'Centro', '', 3200.00, NOW()),
+('Gabriel Rocha', '123.456.789-05', 'FÍSICO', 'gabriel1@gmail.com', '(27)94444-1111', 'Linhares', 'ES', '29900-000', 'Rua F', 'Brasil', '60', 'Bairro X', '', 2800.00, NOW()),
+('Helena Costa', '123.456.789-06', 'FÍSICO', 'helena1@gmail.com', '(27)93333-1111', 'Colatina', 'ES', '29700-000', 'Rua G', 'Brasil', '70', 'Centro', '', 4000.00, NOW()),
+('Igor Santos', '123.456.789-07', 'FÍSICO', 'igor1@gmail.com', '(27)92222-1111', 'Aracruz', 'ES', '29190-000', 'Rua H', 'Brasil', '80', 'Industrial', '', 3500.00, NOW()),
+('Júlia Mendes', '123.456.789-08', 'FÍSICO', 'julia1@gmail.com', '(27)91111-1111', 'São Mateus', 'ES', '29930-000', 'Rua I', 'Brasil', '90', 'Centro', '', 5000.00, NOW()),
+
+('Kleber Oliveira', '123.456.789-09', 'FÍSICO', 'kleber1@gmail.com', '(27)90000-1111', 'Vitória', 'ES', '29050-000', 'Rua J', 'Brasil', '11', 'Jardim', '', 1500.00, NOW()),
+('Lucas Pereira', '123.456.789-10', 'FÍSICO', 'lucas1@gmail.com', '(27)98887-1111', 'Serra', 'ES', '29165-000', 'Rua K', 'Brasil', '12', 'Laranjeiras', '', 6000.00, NOW()),
+('Mariana Lima', '123.456.789-11', 'FÍSICO', 'mariana1@gmail.com', '(27)97776-1111', 'Viana', 'ES', '29130-000', 'Rua L', 'Brasil', '13', 'Centro', '', 4200.00, NOW()),
+('Nicolas Dias', '123.456.789-12', 'FÍSICO', 'nicolas1@gmail.com', '(27)96665-1111', 'Cariacica', 'ES', '29145-000', 'Rua M', 'Brasil', '14', 'Nova Brasília', '', 3800.00, NOW()),
+('Otávio Ribeiro', '123.456.789-13', 'FÍSICO', 'otavio1@gmail.com', '(27)95554-1111', 'Vila Velha', 'ES', '29102-000', 'Rua N', 'Brasil', '15', 'Itapuã', '', 7000.00, NOW()),
+
+('Paula Andrade', '123.456.789-14', 'FÍSICO', 'paula1@gmail.com', '(27)94443-1111', 'Guarapari', 'ES', '29210-000', 'Rua O', 'Brasil', '16', 'Praia', '', 3100.00, NOW()),
+('Quality Sistemas LTDA', '22.222.222/0001-22', 'JURÍDICO', 'quality@gmail.com', '(27)3333-2222', 'Vitória', 'ES', '29015-000', 'Av. Tecnologia', 'Brasil', '200', 'Centro', 'Sala 2', 50000.00, NOW()),
+('Rafael Nunes', '123.456.789-15', 'FÍSICO', 'rafael1@gmail.com', '(27)93332-1111', 'Serra', 'ES', '29170-000', 'Rua P', 'Brasil', '17', 'Civit', '', 2600.00, NOW()),
+('Sofia Martins', '123.456.789-16', 'FÍSICO', 'sofia1@gmail.com', '(27)92221-1111', 'Linhares', 'ES', '29910-000', 'Rua Q', 'Brasil', '18', 'Centro', '', 4800.00, NOW()),
+('Thiago Alves', '123.456.789-17', 'FÍSICO', 'thiago1@gmail.com', '(27)91110-1111', 'Colatina', 'ES', '29710-000', 'Rua R', 'Brasil', '19', 'Bairro X', '', 3900.00, NOW());
+
+INSERT INTO produtos 
+(nome_produto, categoria, sku, preco_custo, preco_venda, qauantidade_estoque, estoque_minimo, status_produto, fornecenador)
+VALUES
+('Notebook Dell Inspiron', 'Informática', 'SKU0001', 2500.00, 3200.00, 15, 5, TRUE, 'Dell Brasil'),
+('Mouse Gamer RGB', 'Periféricos', 'SKU0002', 45.00, 89.90, 50, 10, TRUE, 'Logitech'),
+('Teclado Mecânico', 'Periféricos', 'SKU0003', 120.00, 199.90, 30, 5, TRUE, 'Redragon'),
+('Monitor 24 Polegadas', 'Monitores', 'SKU0004', 650.00, 899.90, 20, 3, TRUE, 'Samsung'),
+('HD Externo 1TB', 'Armazenamento', 'SKU0005', 180.00, 299.90, 25, 5, TRUE, 'Seagate'),
+('SSD 480GB', 'Armazenamento', 'SKU0006', 220.00, 349.90, 18, 4, TRUE, 'Kingston'),
+('Cadeira Gamer', 'Móveis', 'SKU0007', 700.00, 1199.90, 10, 2, TRUE, 'DXRacer'),
+('Webcam Full HD', 'Acessórios', 'SKU0008', 150.00, 249.90, 22, 5, TRUE, 'Logitech'),
+('Impressora Multifuncional', 'Impressoras', 'SKU0009', 400.00, 599.90, 12, 2, TRUE, 'HP'),
+('Tablet Android', 'Mobile', 'SKU0010', 900.00, 1299.90, 14, 3, TRUE, 'Samsung'),
+('Smartphone Galaxy', 'Mobile', 'SKU0011', 1400.00, 1999.90, 16, 4, TRUE, 'Samsung'),
+('iPhone 13', 'Mobile', 'SKU0012', 3500.00, 4999.90, 8, 2, TRUE, 'Apple'),
+('Caixa de Som Bluetooth', 'Áudio', 'SKU0013', 90.00, 149.90, 40, 8, TRUE, 'JBL'),
+('Headset Gamer', 'Áudio', 'SKU0014', 130.00, 249.90, 28, 6, TRUE, 'HyperX'),
+('Microfone Condensador', 'Áudio', 'SKU0015', 200.00, 349.90, 15, 3, TRUE, 'Blue Yeti'),
+('Fonte 600W', 'Hardware', 'SKU0016', 210.00, 329.90, 19, 4, TRUE, 'Corsair'),
+('Placa de Vídeo RTX 4060', 'Hardware', 'SKU0017', 2200.00, 3199.90, 7, 2, TRUE, 'NVIDIA'),
+('Memória RAM 16GB', 'Hardware', 'SKU0018', 180.00, 289.90, 26, 5, TRUE, 'Kingston'),
+('Processador Ryzen 7', 'Hardware', 'SKU0019', 1300.00, 1899.90, 9, 2, TRUE, 'AMD'),
+('Placa Mãe B550', 'Hardware', 'SKU0020', 500.00, 749.90, 11, 3, TRUE, 'ASUS'),
+('Gabinete Gamer', 'Hardware', 'SKU0021', 250.00, 399.90, 17, 4, TRUE, 'Cooler Master'),
+('Cooler RGB', 'Hardware', 'SKU0022', 80.00, 139.90, 35, 7, TRUE, 'Rise Mode'),
+('Roteador Wi-Fi 6', 'Redes', 'SKU0023', 300.00, 499.90, 13, 3, TRUE, 'TP-Link'),
+('Switch 8 Portas', 'Redes', 'SKU0024', 120.00, 199.90, 18, 4, TRUE, 'Intelbras'),
+('Cabo HDMI 2m', 'Acessórios', 'SKU0025', 15.00, 39.90, 100, 20, TRUE, 'Multilaser'),
+('Pen Drive 64GB', 'Armazenamento', 'SKU0026', 35.00, 69.90, 60, 10, TRUE, 'Sandisk'),
+('Smartwatch', 'Wearables', 'SKU0027', 250.00, 499.90, 21, 5, TRUE, 'Xiaomi'),
+('Carregador Turbo', 'Acessórios', 'SKU0028', 40.00, 79.90, 45, 8, TRUE, 'Baseus'),
+('Drone com Câmera', 'Eletrônicos', 'SKU0029', 1200.00, 1799.90, 6, 1, TRUE, 'DJI'),
+('Projetor LED', 'Eletrônicos', 'SKU0030', 850.00, 1299.90, 8, 2, TRUE, 'Epson'),
+('TV Smart 50"', 'Eletrônicos', 'SKU0031', 1800.00, 2599.90, 10, 2, TRUE, 'LG'),
+('Console PS5', 'Games', 'SKU0032', 3200.00, 4499.90, 5, 1, TRUE, 'Sony'),
+('Controle Xbox', 'Games', 'SKU0033', 220.00, 349.90, 14, 3, TRUE, 'Microsoft'),
+('Notebook Lenovo IdeaPad', 'Informática', 'SKU0034', 2100.00, 2999.90, 12, 3, TRUE, 'Lenovo'),
+('Scanner de Mesa', 'Impressoras', 'SKU0035', 350.00, 549.90, 9, 2, TRUE, 'Canon');
+
+INSERT INTO pedidos (cod_cliente, cod_usuario, data_pedido, status_pedido, valor_total)
+VALUES
+(1, 1, '2026-01-01', 'CONCLUIDO', 120.50),
+(2, 2, '2026-01-01', 'PENDENTE', 300.00),
+(3, 3, '2026-01-02', 'EM_ANDAMENTO', 450.75),
+(4, 4, '2026-01-02', 'CANCELADO', 80.00),
+(5, 5, '2026-01-03', 'CONCLUIDO', 999.99),
+(6, 1, '2026-01-03', 'PENDENTE', 150.20),
+(7, 2, '2026-01-04', 'EM_ANDAMENTO', 700.00),
+(8, 3, '2026-01-04', 'CONCLUIDO', 210.10),
+(9, 4, '2026-01-05', 'PENDENTE', 560.00),
+(10, 5, '2026-01-05', 'CONCLUIDO', 320.30),
+(11, 1, '2026-01-06', 'EM_ANDAMENTO', 890.00),
+(12, 2, '2026-01-06', 'CANCELADO', 100.00),
+(13, 3, '2026-01-07', 'CONCLUIDO', 430.50),
+(14, 4, '2026-01-07', 'PENDENTE', 275.90),
+(15, 5, '2026-01-08', 'CONCLUIDO', 640.00),
+(16, 1, '2026-01-08', 'EM_ANDAMENTO', 980.40),
+(17, 2, '2026-01-09', 'PENDENTE', 120.00),
+(18, 3, '2026-01-09', 'CONCLUIDO', 1500.00),
+(19, 4, '2026-01-10', 'CANCELADO', 60.00),
+(20, 5, '2026-01-10', 'CONCLUIDO', 770.30),
+
+(1, 2, '2026-01-11', 'PENDENTE', 340.00),
+(2, 3, '2026-01-11', 'EM_ANDAMENTO', 890.00),
+(3, 4, '2026-01-12', 'CONCLUIDO', 410.20),
+(4, 5, '2026-01-12', 'PENDENTE', 250.00),
+(5, 1, '2026-01-13', 'CONCLUIDO', 1100.00),
+(6, 2, '2026-01-13', 'EM_ANDAMENTO', 320.00),
+(7, 3, '2026-01-14', 'PENDENTE', 600.00),
+(8, 4, '2026-01-14', 'CONCLUIDO', 710.90),
+(9, 5, '2026-01-15', 'CANCELADO', 90.00),
+(10, 1, '2026-01-15', 'CONCLUIDO', 480.50),
+(11, 2, '2026-01-16', 'PENDENTE', 390.00),
+(12, 3, '2026-01-16', 'EM_ANDAMENTO', 820.00),
+(13, 4, '2026-01-17', 'CONCLUIDO', 150.00),
+(14, 5, '2026-01-17', 'PENDENTE', 670.00),
+(15, 1, '2026-01-18', 'CONCLUIDO', 920.00),
+(16, 2, '2026-01-18', 'EM_ANDAMENTO', 300.00),
+(17, 3, '2026-01-19', 'PENDENTE', 200.00),
+(18, 4, '2026-01-19', 'CONCLUIDO', 1050.00),
+(19, 5, '2026-01-20', 'CANCELADO', 140.00),
+(20, 1, '2026-01-20', 'CONCLUIDO', 600.00),
+
+(1, 2, '2026-01-21', 'PENDENTE', 410.00),
+(2, 3, '2026-01-21', 'EM_ANDAMENTO', 990.00),
+(3, 4, '2026-01-22', 'CONCLUIDO', 520.00),
+(4, 5, '2026-01-22', 'PENDENTE', 310.00),
+(5, 1, '2026-01-23', 'CONCLUIDO', 1230.00),
+(6, 2, '2026-01-23', 'EM_ANDAMENTO', 430.00),
+(7, 3, '2026-01-24', 'PENDENTE', 780.00),
+(8, 4, '2026-01-24', 'CONCLUIDO', 860.00),
+(9, 5, '2026-01-25', 'CANCELADO', 95.00),
+(10, 1, '2026-01-25', 'CONCLUIDO', 540.00);
+
+INSERT INTO pedidos (cod_cliente, cod_usuario, data_pedido, status_pedido, valor_total)
+VALUES
+(1, 1, '2026-01-01', 'CONCLUIDO', 120.00),
+(2, 2, '2026-01-01', 'PENDENTE', 250.00),
+(3, 3, '2026-01-02', 'EM_ANDAMENTO', 330.50),
+(4, 4, '2026-01-02', 'CANCELADO', 80.00),
+(5, 5, '2026-01-03', 'CONCLUIDO', 900.00),
+(6, 1, '2026-01-03', 'PENDENTE', 150.00),
+(7, 2, '2026-01-04', 'CONCLUIDO', 420.00),
+(8, 3, '2026-01-04', 'EM_ANDAMENTO', 610.00),
+(9, 4, '2026-01-05', 'PENDENTE', 275.00),
+(10, 5, '2026-01-05', 'CONCLUIDO', 520.00),
+
+(11, 1, '2026-01-06', 'EM_ANDAMENTO', 310.00),
+(12, 2, '2026-01-06', 'PENDENTE', 199.90),
+(13, 3, '2026-01-07', 'CONCLUIDO', 870.00),
+(14, 4, '2026-01-07', 'CANCELADO', 60.00),
+(15, 5, '2026-01-08', 'CONCLUIDO', 430.00),
+(16, 1, '2026-01-08', 'PENDENTE', 250.00),
+(17, 2, '2026-01-09', 'EM_ANDAMENTO', 780.00),
+(18, 3, '2026-01-09', 'CONCLUIDO', 990.00),
+(19, 4, '2026-01-10', 'PENDENTE', 110.00),
+(20, 5, '2026-01-10', 'CONCLUIDO', 640.00),
+
+(1, 2, '2026-01-11', 'PENDENTE', 320.00),
+(2, 3, '2026-01-11', 'CONCLUIDO', 510.00),
+(3, 4, '2026-01-12', 'EM_ANDAMENTO', 770.00),
+(4, 5, '2026-01-12', 'PENDENTE', 190.00),
+(5, 1, '2026-01-13', 'CONCLUIDO', 860.00),
+(6, 2, '2026-01-13', 'CANCELADO', 95.00),
+(7, 3, '2026-01-14', 'EM_ANDAMENTO', 430.00),
+(8, 4, '2026-01-14', 'CONCLUIDO', 1200.00),
+(9, 5, '2026-01-15', 'PENDENTE', 340.00),
+(10, 1, '2026-01-15', 'CONCLUIDO', 680.00),
+
+(11, 2, '2026-01-16', 'EM_ANDAMENTO', 290.00),
+(12, 3, '2026-01-16', 'PENDENTE', 150.00),
+(13, 4, '2026-01-17', 'CONCLUIDO', 990.00),
+(14, 5, '2026-01-17', 'CANCELADO', 70.00),
+(15, 1, '2026-01-18', 'CONCLUIDO', 540.00),
+(16, 2, '2026-01-18', 'EM_ANDAMENTO', 310.00),
+(17, 3, '2026-01-19', 'PENDENTE', 260.00),
+(18, 4, '2026-01-19', 'CONCLUIDO', 1100.00),
+(19, 5, '2026-01-20', 'CANCELADO', 130.00),
+(20, 1, '2026-01-20', 'CONCLUIDO', 760.00),
+
+(1, 2, '2026-01-21', 'PENDENTE', 410.00),
+(2, 3, '2026-01-21', 'EM_ANDAMENTO', 590.00),
+(3, 4, '2026-01-22', 'CONCLUIDO', 820.00),
+(4, 5, '2026-01-22', 'PENDENTE', 300.00),
+(5, 1, '2026-01-23', 'CONCLUIDO', 940.00),
+(6, 2, '2026-01-23', 'EM_ANDAMENTO', 180.00),
+(7, 3, '2026-01-24', 'PENDENTE', 660.00),
+(8, 4, '2026-01-24', 'CONCLUIDO', 1230.00),
+(9, 5, '2026-01-25', 'CANCELADO', 100.00),
+(10, 1, '2026-01-25', 'CONCLUIDO', 720.00);
+
+INSERT INTO itens_pedido (cod_pedido, cod_produto, quantidade, preco_unitario, desconto_percentual)
+VALUES
+(1, 1, 2, 50.00, 0),(1, 2, 1, 70.00, 0),(1, 3, 3, 250.00, 5),(1, 4, 1, 900.00, 10),(1, 5, 2, 850.00, 0),
+(1, 6, 1, 600.00, 0),(1, 7, 2, 300.00, 0),(1, 8, 1, 800.00, 5),(1, 9, 1, 1500.00, 0),(1, 10, 2, 1800.00, 0),
+
+(2, 11, 1, 1200.00, 0),(2, 12, 1, 5500.00, 5),(2, 13, 2, 150.00, 0),(2, 14, 1, 300.00, 0),(2, 15, 1, 600.00, 0),
+(2, 16, 3, 50.00, 0),(2, 17, 2, 120.00, 0),(2, 18, 1, 250.00, 5),(2, 19, 2, 40.00, 0),(2, 20, 1, 200.00, 0),
+
+(3, 21, 5, 25.00, 0),(3, 22, 3, 12.00, 0),(3, 23, 2, 8.00, 0),(3, 24, 4, 20.00, 0),(3, 25, 6, 7.00, 0),
+(3, 26, 2, 5.00, 0),(3, 27, 1, 18.00, 0),(3, 28, 3, 15.00, 0),(3, 29, 2, 10.00, 0),(3, 30, 1, 30.00, 0),
+
+(4, 31, 1, 60.00, 0),(4, 32, 2, 200.00, 5),(4, 33, 1, 120.00, 0),(4, 34, 2, 90.00, 0),(4, 35, 1, 300.00, 10),
+(4, 1, 1, 50.00, 0),(4, 2, 2, 70.00, 0),(4, 3, 1, 250.00, 0),(4, 4, 2, 900.00, 0),(4, 5, 1, 850.00, 0),
+
+(5, 6, 2, 600.00, 0),(5, 7, 1, 300.00, 0),(5, 8, 2, 800.00, 0),(5, 9, 1, 1500.00, 5),(5, 10, 1, 1800.00, 0),
+(5, 11, 1, 1200.00, 0),(5, 12, 1, 5500.00, 10),(5, 13, 2, 150.00, 0),(5, 14, 1, 300.00, 0),(5, 15, 2, 600.00, 0),
+
+(1, 16, 3, 50.00, 0),(1, 17, 2, 120.00, 0),(1, 18, 1, 250.00, 0),(1, 19, 2, 40.00, 0),(1, 20, 1, 200.00, 0),
+(2, 21, 2, 25.00, 0),(2, 22, 1, 12.00, 0),(2, 23, 3, 8.00, 0),(2, 24, 2, 20.00, 0),(2, 25, 1, 7.00, 0),
+
+(3, 26, 2, 5.00, 0),(3, 27, 1, 18.00, 0),(3, 28, 2, 15.00, 0),(3, 29, 1, 10.00, 0),(3, 30, 2, 30.00, 0),
+(4, 31, 1, 60.00, 0),(4, 32, 1, 200.00, 0),(4, 33, 2, 120.00, 0),(4, 34, 1, 90.00, 0),(4, 35, 2, 300.00, 0),
+
+(5, 1, 1, 50.00, 0),(5, 2, 1, 70.00, 0),(5, 3, 2, 250.00, 0),(5, 4, 1, 900.00, 0),(5, 5, 2, 850.00, 0);
+
+INSERT INTO pagamentos (id_pedido, metodo_pagamento, valor_pago, status_pagamento)
+VALUES
+(1, 'PIX', 120.00, 'aprovado'),
+(2, 'CREDITO', 250.00, 'pendente'),
+(3, 'DEBITO', 330.50, 'aprovado'),
+(4, 'DINHEIRO', 80.00, 'recusado'),
+(5, 'PIX', 900.00, 'aprovado'),
+
+(1, 'BOLETO', 120.00, 'pendente'),
+(2, 'PIX', 250.00, 'aprovado'),
+(3, 'CREDITO', 330.50, 'aprovado'),
+(4, 'DEBITO', 80.00, 'pendente'),
+(5, 'DINHEIRO', 900.00, 'aprovado'),
+
+(1, 'PIX', 120.00, 'aprovado'),
+(2, 'CREDITO', 250.00, 'recusado'),
+(3, 'DEBITO', 330.50, 'aprovado'),
+(4, 'PIX', 80.00, 'aprovado'),
+(5, 'BOLETO', 900.00, 'pendente'),
+
+(1, 'CREDITO', 120.00, 'aprovado'),
+(2, 'PIX', 250.00, 'aprovado'),
+(3, 'DINHEIRO', 330.50, 'pendente'),
+(4, 'DEBITO', 80.00, 'aprovado'),
+(5, 'PIX', 900.00, 'recusado'),
+
+(1, 'PIX', 120.00, 'aprovado'),
+(2, 'BOLETO', 250.00, 'pendente'),
+(3, 'CREDITO', 330.50, 'aprovado'),
+(4, 'DINHEIRO', 80.00, 'aprovado'),
+(5, 'DEBITO', 900.00, 'aprovado'),
+
+(1, 'CREDITO', 120.00, 'pendente'),
+(2, 'PIX', 250.00, 'aprovado'),
+(3, 'DEBITO', 330.50, 'aprovado'),
+(4, 'PIX', 80.00, 'recusado'),
+(5, 'BOLETO', 900.00, 'aprovado'),
+
+(1, 'DINHEIRO', 120.00, 'aprovado'),
+(2, 'CREDITO', 250.00, 'aprovado'),
+(3, 'PIX', 330.50, 'pendente'),
+(4, 'DEBITO', 80.00, 'aprovado'),
+(5, 'PIX', 900.00, 'aprovado'),
+
+(1, 'PIX', 120.00, 'aprovado'),
+(2, 'BOLETO', 250.00, 'recusado'),
+(3, 'CREDITO', 330.50, 'aprovado'),
+(4, 'DINHEIRO', 80.00, 'pendente'),
+(5, 'DEBITO', 900.00, 'aprovado'),
+
+(1, 'CREDITO', 120.00, 'aprovado'),
+(2, 'PIX', 250.00, 'aprovado'),
+(3, 'DEBITO', 330.50, 'aprovado'),
+(4, 'BOLETO', 80.00, 'aprovado'),
+(5, 'PIX', 900.00, 'pendente');
+
+
+-- LISTA DE VIEWS
+CREATE OR REPLACE VIEW vw_produtos_ativos AS 
+SELECT id_produto, sku, nome_produto, categoria, preco_venda, qauantidade_estoque, status_produto
+FROM produtos
+WHERE status_produto = TRUE;
+
+SELECT * FROM vw_produtos_ativos;
+
+-- Lista de produtos com estoque abaixo do minimo
+CREATE OR REPLACE VIEW vw_alerta_estoque_minimo AS
+SELECT sku, nome_produto, fornecenador, qauantidade_estoque, estoque_minimo
+FROM produtos
+WHERE qauantidade_estoque <= estoque_minimo AND status_produto = TRUE;
+
+SELECT * FROM vw_alerta_estoque_minimo;
+
+-- VIEWS PARA GESTÃO DE CLIENTES
+-- Lista os dados dos cliente para o marketing, ocultando informações sensíveis
+CREATE OR REPLACE VIEW vw_contatos_marketing AS
+SELECT nome_cliente, email_cliente, telefone, cidade, estado
+FROM clientes
+WHERE email_cliente IS NOT NULL;
+
+SELECT * FROM vw_contatos_marketing;
+
+-- Lista de clientes fisicos
+CREATE OR REPLACE VIEW vw_cliente_fisico AS
+SELECT id_cliente, nome_cliente, CPF_CNPJ AS CPF
+FROM clientes
+WHERE tipo = 'FISICO';
+
+SELECT * FROM vw_cliente_fisico;
+
+-- Lista de clientes juridicos
+CREATE OR REPLACE VIEW vw_cliente_juridico AS
+SELECT id_cliente, nome_cliente, CPF_CNPJ AS CNPJ
+FROM clientes
+WHERE tipo = 'JURIDICO';
+
+SELECT * FROM vw_cliente_juridico;
+
+-- VIEWS PARA VENDAS+
+-- VIEWS PARA RESUMO DE VENDAS
+CREATE OR REPLACE VIEW vw_resumo_pedidos AS
+SELECT p.cod_cliente, p.data_pedido, c.nome_cliente AS cliente, p.status_pedido, p.valor_total
+FROM pedidos AS P
+JOIN clientes AS c ON p.cod_cliente = c.id_cliente
+JOIN usuarios AS u ON p.cod_usuario = u.id_usuario;
+
+SELECT * FROM vw_resumo_pedidos;
+
+
+
